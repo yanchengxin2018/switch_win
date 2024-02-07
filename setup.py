@@ -8,5 +8,10 @@ setup(
             'switch_win = switch_win.main:main',
         ],
     },
+
     packages=['switch_win'],
+    install_requires=[
+        'keyboard',
+        'python-xlib',
+    ],
 )
