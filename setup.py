@@ -2,10 +2,11 @@ from setuptools import setup
 
 setup(
     name='switch_win',
-    version='2024.2.8.0',
+    version='2024.2.8.2',
     entry_points={
         'console_scripts': [
-            'sw = switch_win.main:main',
+            'switch_win = switch_win.main:main',
+            'sw = switch_win.back:main',
         ],
     },
 
