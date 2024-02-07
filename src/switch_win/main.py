@@ -127,6 +127,8 @@ def key2window_id(key):
 
 # 切换到窗口
 def switch_to_window(key):
+    if is_exit:
+        return
     check_birthday()
     windows_id = key2window_id(key)
     # print(windows_id)
@@ -136,6 +138,8 @@ def switch_to_window(key):
 
 # 检测ctrl+shift+num
 def on_key_event(event):
+    if is_exit:
+        return
     if event.event_type != keyboard.KEY_DOWN:
         return
     hotkey = keyboard.get_hotkey_name()
