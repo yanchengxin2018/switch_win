@@ -62,9 +62,9 @@ def key2window_id(key):
 
     tk_obj = tk.Tk()
     tk_obj.title("定义快捷窗口")
-    windows_ids = utils.get_window_ids()
+    windows_ids = get_window_ids()
     for windows_id in windows_ids:
-        name = utils.get_window_info(windows_id)
+        name = get_window_info(windows_id)
 
         if windows_id in windows_map:
             now_key = windows_map[windows_id]
@@ -89,7 +89,7 @@ def key2window_id(key):
 def switch_to_window(key):
     windows_id = key2window_id(key)
     # print(windows_id)
-    utils.focus_window(windows_id)
+    focus_window(windows_id)
     print(f'切换到{windows_id}')
 
 

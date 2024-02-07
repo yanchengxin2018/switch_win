@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='switch_win',
-    version='2024.2.7.24',
+    version='2024.2.8.0',
     entry_points={
         'console_scripts': [
             'sw = switch_win.main:main',
