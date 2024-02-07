@@ -1,19 +1,62 @@
 import keyboard
-import utils
 import tkinter as tk
+from typing import Literal
+import Xlib
+from Xlib import display, Xatom
 
-windows_map = {
+display_obj = display.Display()
+root = display_obj.screen().root
+
+key_map = {
     # key:window_id
+}
+windows_map = {
+    # window_id:key
 }
 
 
+# 当前窗口列表id
+def get_window_ids():
+    global display_obj, root
+    window_ids = root.get_full_property(display_obj.intern_atom('_NET_CLIENT_LIST'), Xlib.X.AnyPropertyType).value
+    window_ids = list(window_ids)
+    return window_ids
+
+
+# 窗口信息
+def get_window_info(window_id):
+    global display_obj
+    window = display_obj.create_resource_object('window', window_id)
+    name = window.get_full_property(display_obj.intern_atom('_NET_WM_NAME'), 0)
+    name = name.value.decode() if name else None
+    # desktop = window.get_full_property(display_obj.intern_atom('_NET_WM_DESKTOP'), 0)
+    # desktop = desktop.value[0] if desktop else None
+    # return name, desktop
+    return name
+
+
+# 切换到窗口
+def focus_window(window_id):
+    global display_obj
+    window = display_obj.create_resource_object('window', window_id)
+    window.set_input_focus(Xlib.X.RevertToParent, Xlib.X.CurrentTime)
+    window.raise_window()
+
+    net_wm_state = display_obj.intern_atom('_NET_WM_STATE')
+    window.change_property(net_wm_state, Xatom.ATOM, 32, [Xatom.ATOM], Xlib.X.PropModeReplace)
+    display_obj.sync()
+
+
 def on_click(tk_obj, key, window_id):
-    windows_map[key] = window_id
+    global key_map, windows_map
+    key_map[key] = window_id
+    windows_map[window_id] = key
     tk_obj.destroy()
 
 
 def key2window_id(key):
-    windows_id = windows_map.get(key, None)
+    global key_map, windows_map
+    windows_id = key_map.get(key, None)
     if windows_id:
         return windows_id
 
@@ -22,13 +65,23 @@ def key2window_id(key):
     windows_ids = utils.get_window_ids()
     for windows_id in windows_ids:
         name = utils.get_window_info(windows_id)
-        if windows_map.get(key, None):
-            name = f'{name} 已映射为{key}'
-        button_obj = tk.Button(tk_obj, text=name, command=lambda win_id=windows_id: on_click(tk_obj, key, win_id))
+
+        if windows_id in windows_map:
+            now_key = windows_map[windows_id]
+            name = f'{now_key}:{name}'
+            state: Literal["normal", "active", "disabled"] = 'disabled'
+        else:
+            state: Literal["normal", "active", "disabled"] = 'normal'
+        button_obj = tk.Button(
+            tk_obj,
+            text=name,
+            command=lambda win_id=windows_id: on_click(tk_obj, key, win_id),
+            state=state,
+        )
         button_obj.pack(pady=10)
     tk_obj.mainloop()
 
-    windows_id = windows_map[key]
+    windows_id = key_map[key]
     return windows_id
 
 

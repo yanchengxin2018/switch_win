@@ -1,3 +1,5 @@
 __pycache__/
 .idea
 qui.egg-info/
+src/switch_win.egg-info
+dist/

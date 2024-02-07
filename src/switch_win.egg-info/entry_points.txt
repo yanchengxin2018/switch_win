@@ -1,2 +1,0 @@
-[console_scripts]
-switch_win = switch_win.main:main
