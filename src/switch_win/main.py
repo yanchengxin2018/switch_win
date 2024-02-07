@@ -1,8 +1,45 @@
+from pathlib import Path
+
 import keyboard
 import tkinter as tk
 from typing import Literal
 import Xlib
 from Xlib import display, Xatom
+import time
+import threading
+
+birthday = time.time()
+birthday_path = '/var/run/sw_birthday'
+is_exit = False
+
+
+def set_birthday():
+    global birthday
+    file_path = Path(birthday_path)
+    if not file_path.exists():
+        with open(file_path, 'w') as _:
+            pass
+    with open(file_path, 'w') as file_obj:
+        data = str(birthday)
+        print('准备写入', data)
+        file_obj.write(data)
+
+
+def check_birthday():
+    global birthday, is_exit
+    file_path = Path(birthday_path)
+    if not file_path.exists():
+        with open(file_path, 'w') as _:
+            pass
+    with open(file_path, 'r') as file_obj:
+        other_birthday = file_obj.read()
+        if not other_birthday:
+            return
+        other_birthday = float(other_birthday)
+        if birthday < other_birthday:
+            is_exit = True
+            print('设置退出')
+
 
 display_obj = display.Display()
 root = display_obj.screen().root
@@ -18,7 +55,10 @@ windows_map = {
 # 当前窗口列表id
 def get_window_ids():
     global display_obj, root
-    window_ids = root.get_full_property(display_obj.intern_atom('_NET_CLIENT_LIST'), Xlib.X.AnyPropertyType).value
+    window_ids = root.get_full_property(
+        display_obj.intern_atom('_NET_CLIENT_LIST'),
+        Xlib.X.AnyPropertyType,
+    ).value
     window_ids = list(window_ids)
     return window_ids
 
@@ -87,6 +127,7 @@ def key2window_id(key):
 
 # 切换到窗口
 def switch_to_window(key):
+    check_birthday()
     windows_id = key2window_id(key)
     # print(windows_id)
     focus_window(windows_id)
@@ -111,9 +152,26 @@ def on_key_event(event):
     switch_to_window(key)
 
 
+def set_is_exit():
+    while True:
+        time.sleep(5)
+        check_birthday()
+        if is_exit:
+            break
+
+
 def main():
+    global is_exit
+    set_birthday()
     keyboard.hook(on_key_event)
-    keyboard.wait('ctrl+shift+esc')
+    # keyboard.wait('ctrl+shift+esc')
+    thread_obj = threading.Thread(target=set_is_exit, )
+    thread_obj.start()
+    while True:
+        keyboard.read_key()
+        hotkey = keyboard.get_hotkey_name()
+        if is_exit or hotkey == 'ctrl+shift+esc':
+            break
 
 
 main()
