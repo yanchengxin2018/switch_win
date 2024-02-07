@@ -1,6 +1,8 @@
 # 功能
+在ubuntu系统下
 Ctrl+Shift+数字 可以切换到预期的窗口  
 (省略了视觉判断的过程,可以加快切换速度)
+
 
 # 安装及使用
 sudo pip install switch-win && sudo sw  
